@@ -12,15 +12,27 @@ import {
   HStack,
   View,
 } from "native-base";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
+import { useCart } from "../../context/cartProvider";
 
 interface props {
   title: string;
   inputNamePrice: string;
   inputNameQuantity: string;
   checkBoxName: string;
-  onCheckInList: any;
+}
+
+interface OriginalObj {
+  [key: string]: string | boolean;
+}
+
+interface OrganizedObj {
+  [key: string]: any;
+  name: string;
+  check: boolean;
+  price: number;
+  qnt: number;
 }
 
 export default function ItemCheck({
@@ -28,9 +40,9 @@ export default function ItemCheck({
   inputNamePrice,
   inputNameQuantity,
   checkBoxName,
-  onCheckInList,
 }: props) {
   const methods = useFormContext();
+  const { addItem } = useCart();
   const [showModal, setShowModal] = useState(false);
   const [currentCart, setCurrentCart] = useState<any[]>([]);
 
@@ -43,27 +55,36 @@ export default function ItemCheck({
     const checkedItems = Object.entries(data)
       .filter(([key, value]) => key.startsWith("check") && value)
       .map(([key]) => {
-        const item = key.replace("check", "").toLowerCase();
+        const item = key.replace("check", "");
+        const id = `item-${item}`;
+        let quantity = 1;
+        // Verifica se as chaves de quantidade e preço existem no objeto data
+        if (
+          data.hasOwnProperty(
+            `qnt${item.charAt(0).toUpperCase()}${item.slice(1)}`
+          )
+        ) {
+          const quantityValue =
+            data[`qnt${item.charAt(0).toUpperCase()}${item.slice(1)}`];
+          quantity = parseFloat(quantityValue) || 0;
+        }
+        const priceValue =
+          data[`price${item.charAt(0).toUpperCase()}${item.slice(1)}`];
+        const price = parseFloat(priceValue) || 0; // Alteração aqui
         return {
-          name: key,
-          quantity: data[`qnt${item.charAt(0).toUpperCase()}${item.slice(1)}`],
-          price: data[`price${item.charAt(0).toUpperCase()}${item.slice(1)}`],
+          id,
+          name: title,
+          quantity,
+          price,
         };
       });
 
     if (checkedItems.length > 0) {
-      setCurrentCart((current) => {
-        const existingItems = current.filter((item) =>
-          checkedItems.some((checkedItem) => checkedItem.name === item.name)
-        );
-        const newItems = checkedItems.filter(
-          (checkedItem) =>
-            !existingItems.some((item) => item.name === checkedItem.name)
-        );
-        return [...existingItems, ...newItems];
-      });
+      addItem(checkedItems);
     }
-    setShowModal(false);
+    if (price !== 0 && price !== undefined && !isNaN(price)) {
+      setShowModal(false);
+    }
   };
 
   useEffect(() => {
@@ -75,19 +96,6 @@ export default function ItemCheck({
       );
     }
   }, [confirmed]);
-
-  useMemo(() => {
-    if (currentCart.length > 0) {
-      console.log(currentCart);
-    }
-    /*  onCheckInList(currentCart); */
-  }, [currentCart]);
-
-  /* useEffect(() => {
-    if (price == "0") {
-      console.log(currentCart);
-    }
-  }, [price]); */
 
   return (
     <>
@@ -128,9 +136,8 @@ export default function ItemCheck({
         )}
       </Pressable>
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+      <Modal isOpen={showModal}>
         <Modal.Content maxWidth="400px">
-          <Modal.CloseButton colorScheme="white" />
           <Modal.Header bg="green.700">
             <Text color="white" fontFamily="heading" fontSize="lg">
               {title}
@@ -138,7 +145,11 @@ export default function ItemCheck({
           </Modal.Header>
           <Modal.Body>
             <HStack flexDirection="row" space={2}>
-              <FormControl maxW="48%">
+              <FormControl
+                isRequired
+                maxW="48%"
+                isInvalid={!!methods.formState.errors[inputNamePrice]}
+              >
                 <FormControl.Label>Preço</FormControl.Label>
                 <Controller
                   control={methods.control}
@@ -150,10 +161,16 @@ export default function ItemCheck({
                       keyboardType="numeric"
                       onChangeText={field.onChange}
                       value={field.value}
+                      isInvalid={!!methods.formState.errors[inputNamePrice]}
                     />
                   )}
                 />
+                <FormControl.ErrorMessage>
+                  {methods.formState.errors[inputNamePrice]?.message ||
+                    "Campo obrigatório"}
+                </FormControl.ErrorMessage>
               </FormControl>
+
               <FormControl maxW="48%">
                 <FormControl.Label>Quantidade</FormControl.Label>
                 <Controller
@@ -172,21 +189,13 @@ export default function ItemCheck({
             </HStack>
           </Modal.Body>
           <Modal.Footer>
-            <Button.Group space={2}>
+            <Button.Group>
               <Button
-                w="50%"
-                bg="gray.400"
-                onPress={() => {
-                  setShowModal(false);
-                }}
-              >
-                Cancelar
-              </Button>
-              <Button
-                w="50%"
+                w="100%"
                 bg="green.700"
                 onPress={methods.handleSubmit(handleConfirm)}
-                aria-label="Confirmar seleção"
+                aria-label="Confirmar"
+                isDisabled={!methods.formState.isValid}
               >
                 Confirmar
               </Button>

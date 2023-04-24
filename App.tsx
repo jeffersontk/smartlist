@@ -1,47 +1,57 @@
 import { StatusBar } from "expo-status-bar";
-import { NativeBaseProvider, Text, View } from "native-base";
-import Home from "./src/screens/Home";
+import { NativeBaseProvider, useTheme } from "native-base";
+
+import CartProvider from "./src/context/cartProvider";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import Header from "./src/components/Header";
-import List from "./src/data/list.json";
-import CartCurrentPrice from "./src/components/CartCurrentPrice";
-import { MyTabBar } from "./src/components/Custom/TabBar";
-import PriceProvider from "./src/context/cartProvider";
+import Home from "./src/screens/Home";
+import MyCart from "./src/screens/MyCart";
+import IconEntypo from "react-native-vector-icons/Entypo";
 
-const Tab = createMaterialTopTabNavigator();
-
-function SettingsScreen() {
-  return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <Text color="#000">Settings!</Text>
-    </View>
-  );
-}
+const Tab = createBottomTabNavigator();
 
 export default function App() {
   return (
     <NativeBaseProvider>
-      <StatusBar style="auto" />
-      <PriceProvider>
-        <View flex={1} bg="#f2f2f2" alignItems="center">
-          <Header></Header>
-          <NavigationContainer>
-            <Tab.Navigator tabBar={(props) => <MyTabBar {...props} />}>
-              {List.map((item) => (
-                <Tab.Screen
-                  key={item.id}
-                  name={item.categorie}
-                  component={Home}
-                  initialParams={item}
-                />
-              ))}
-            </Tab.Navigator>
-          </NavigationContainer>
-
-          <CartCurrentPrice />
-        </View>
-      </PriceProvider>
+      <CartProvider>
+        <StatusBar style="auto" />
+        <NavigationContainer>
+          <Tab.Navigator
+            screenOptions={{
+              headerShown: false,
+              tabBarShowLabel: false,
+              tabBarActiveTintColor: "#fff",
+              tabBarInactiveTintColor: "#6FCF97",
+              tabBarStyle: {
+                backgroundColor: "#219653",
+                borderTopWidth: 0,
+                height: 64,
+                paddingBottom: 10,
+                paddingTop: 10,
+              },
+            }}
+          >
+            <Tab.Screen
+              name="List"
+              component={Home}
+              options={{
+                tabBarIcon: ({ color }) => (
+                  <IconEntypo name="shopping-cart" size={30} color={color} />
+                ),
+              }}
+            />
+            <Tab.Screen
+              name="MyCart"
+              component={MyCart}
+              options={{
+                tabBarIcon: ({ color }) => (
+                  <IconEntypo name="list" size={30} color={color} />
+                ),
+              }}
+            />
+          </Tab.Navigator>
+        </NavigationContainer>
+      </CartProvider>
     </NativeBaseProvider>
   );
 }

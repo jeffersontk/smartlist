@@ -1,12 +1,12 @@
-import { Text, Flex } from "native-base";
+import { Text, Flex, HStack } from "native-base";
 import React from "react";
-import { usePrice } from "../../hooks/useCart";
+import { useCart } from "../../context/cartProvider";
 
 export default function CartCurrentPrice() {
-  const { price } = usePrice();
+  const { total } = useCart();
 
   return (
-    <Flex
+    <HStack
       rounded="full"
       bg="green.700"
       paddingY={4}
@@ -14,16 +14,14 @@ export default function CartCurrentPrice() {
       alignItems="center"
       justifyContent="space-between"
       flexDirection="row"
-      w="90%"
-      mt="5"
-      mb="5"
+      w="320px"
     >
       <Text fontSize="xl" color="green.100">
         Total no carrinho
       </Text>
       <Text fontSize="2xl" color="green.100" fontWeight="normal">
-        R$ {price}
+        R$ {total}
       </Text>
-    </Flex>
+    </HStack>
   );
 }

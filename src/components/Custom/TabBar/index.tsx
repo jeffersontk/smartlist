@@ -75,6 +75,8 @@ export function MyTabBar({ state, descriptors, navigation, position }: any) {
         renderItem({ item, index, state, descriptors, navigation })
       }
       maxH={50}
+      initialNumToRender={4}
+      maxToRenderPerBatch={2}
       mb="2"
       mt="2"
     />

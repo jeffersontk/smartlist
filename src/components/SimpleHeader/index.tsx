@@ -1,18 +1,9 @@
 import React from "react";
 import Logo from "../../assets/logo.svg";
-import {
-  VStack,
-  Input,
-  InputGroup,
-  InputLeftAddon,
-  HStack,
-  Text,
-  Center,
-} from "native-base";
+import { VStack, Input, InputGroup, InputLeftAddon, HStack } from "native-base";
 import Icon from "react-native-vector-icons/FontAwesome";
-import IconEntypo from "react-native-vector-icons/Entypo";
 
-export default function Header({ navigation, title }: any) {
+export default function SimpleHeader() {
   return (
     <VStack>
       <VStack
@@ -25,12 +16,6 @@ export default function Header({ navigation, title }: any) {
       >
         <HStack justifyContent="space-between" alignItems="center" mb="2">
           <Logo />
-          <IconEntypo
-            name="menu"
-            size={34}
-            color="#f9f9f9"
-            onPress={() => navigation.toggleDrawer()}
-          />
         </HStack>
         <InputGroup
           w={{
@@ -68,11 +53,6 @@ export default function Header({ navigation, title }: any) {
           />
         </InputGroup>
       </VStack>
-      <Center my="4">
-        <Text fontSize="xl" color="gray.700">
-          {title}
-        </Text>
-      </Center>
     </VStack>
   );
 }
