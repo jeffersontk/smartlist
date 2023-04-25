@@ -32,24 +32,18 @@ const CartProvider = ({ children }: CartProviderProps) => {
   const [total, setTotal] = useState<number>(0);
 
   const addItem = (items: CartItem[]) => {
-    console.log("items", items);
     setItems((prevItems) => {
-      const updatedItems = prevItems.map((prevItem) => {
-        const newItem = items.find((item) => item.id === prevItem.id);
-        if (newItem) {
-          return {
-            ...prevItem,
-            quantity: newItem.quantity,
-            price: newItem.price,
-          };
+      items.forEach((newItem) => {
+        const index = prevItems.findIndex(
+          (prevItem) => prevItem.id === newItem.id
+        );
+        if (index !== -1) {
+          prevItems[index].quantity += newItem.quantity;
         } else {
-          return prevItem;
+          prevItems.push(newItem);
         }
       });
-      const newItems = items.filter(
-        (item) => !prevItems.some((prevItem) => prevItem.id === item.id)
-      );
-      return [...updatedItems, ...newItems];
+      return [...prevItems];
     });
   };
 

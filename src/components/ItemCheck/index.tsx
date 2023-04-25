@@ -1,10 +1,7 @@
-import { TouchableOpacity } from "react-native";
-
 import {
   Pressable,
   Checkbox,
   Text,
-  Flex,
   Modal,
   FormControl,
   Input,
@@ -12,39 +9,45 @@ import {
   HStack,
   View,
 } from "native-base";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Dimensions } from "react-native";
+import React, { useEffect, useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import {
+  GestureDetector,
+  Gesture,
+  Directions,
+} from "react-native-gesture-handler";
+
 import { useCart } from "../../context/cartProvider";
+import { styles } from "./styles";
 
 interface props {
+  id: string;
   title: string;
   inputNamePrice: string;
   inputNameQuantity: string;
   checkBoxName: string;
 }
 
-interface OriginalObj {
-  [key: string]: string | boolean;
-}
-
-interface OrganizedObj {
-  [key: string]: any;
-  name: string;
-  check: boolean;
-  price: number;
-  qnt: number;
-}
+const START = 0;
+const LIMIT = Dimensions.get("window").width - 350;
 
 export default function ItemCheck({
+  id,
   title,
   inputNamePrice,
   inputNameQuantity,
   checkBoxName,
 }: props) {
   const methods = useFormContext();
-  const { addItem } = useCart();
+  const { addItem, removeItem } = useCart();
   const [showModal, setShowModal] = useState(false);
-  const [currentCart, setCurrentCart] = useState<any[]>([]);
+  const [showButton, setShowButton] = useState(false);
 
   const price = methods.watch(inputNamePrice);
   const quantity = methods.watch(inputNameQuantity);
@@ -52,13 +55,13 @@ export default function ItemCheck({
   const isVisibleDetails = price !== "0" && quantity && confirmed;
 
   const handleConfirm = (data: any) => {
+    console.log("data", data);
     const checkedItems = Object.entries(data)
       .filter(([key, value]) => key.startsWith("check") && value)
       .map(([key]) => {
         const item = key.replace("check", "");
-        const id = `item-${item}`;
         let quantity = 1;
-        // Verifica se as chaves de quantidade e preço existem no objeto data
+
         if (
           data.hasOwnProperty(
             `qnt${item.charAt(0).toUpperCase()}${item.slice(1)}`
@@ -70,7 +73,7 @@ export default function ItemCheck({
         }
         const priceValue =
           data[`price${item.charAt(0).toUpperCase()}${item.slice(1)}`];
-        const price = parseFloat(priceValue) || 0; // Alteração aqui
+        const price = parseFloat(priceValue) || 0;
         return {
           id,
           name: title,
@@ -91,51 +94,79 @@ export default function ItemCheck({
     if (confirmed) {
       setShowModal(true);
     } else {
-      setCurrentCart((current) =>
-        current.filter((item) => item.name !== checkBoxName)
-      );
+      removeItem(id);
     }
   }, [confirmed]);
 
-  return (
-    <>
-      <Pressable
-        rounded="8"
-        overflow="hidden"
-        borderWidth="1"
-        borderColor="coolGray.300"
-        bg="coolGray.100"
-        width={380}
-        p={4}
-        mb={4}
-      >
-        <HStack alignItems="center" justifyContent="space-between">
-          <View>
-            <Text fontSize="md">{title}</Text>
-          </View>
-          <Controller
-            control={methods.control}
-            name={checkBoxName}
-            defaultValue={false}
-            render={({ field: { value, onChange } }) => (
-              <Checkbox
-                colorScheme="green"
-                size="md"
-                aria-label="Confirmar seleção do produto"
-                value={value}
-                onChange={onChange}
-              />
-            )}
-          />
-        </HStack>
-        {isVisibleDetails && (
-          <HStack justifyContent="space-between" mt="2">
-            <Text color="gray.500">Quantidade: {quantity}</Text>
-            <Text color="gray.500">Preço unidade: R${price}</Text>
-          </HStack>
-        )}
-      </Pressable>
+  const position = useSharedValue(0);
 
+  const directionRight = Gesture.Fling()
+    .direction(Directions.RIGHT)
+    .onStart(() => {
+      position.value = withTiming(LIMIT, { duration: 500 });
+      setShowButton(true);
+    });
+  const directionLeft = Gesture.Fling()
+    .direction(Directions.LEFT)
+    .onStart(() => {
+      position.value = withTiming(START, { duration: 500 });
+      setShowButton(false);
+    });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: position.value }],
+  }));
+
+  return (
+    <View width="100%">
+      <HStack>
+        <Button
+          display={showButton ? "block" : "none"}
+          background="green.600"
+          h="60"
+          mr="2"
+        >
+          <Text color="white" width={60} textAlign="center">
+            Tenho em casa
+          </Text>
+        </Button>
+        <GestureDetector
+          gesture={Gesture.Exclusive(directionRight, directionLeft)}
+        >
+          <Animated.View style={[animatedStyle, styles.container]}>
+            <HStack
+              alignItems="center"
+              h="60"
+              px="5"
+              justifyContent="space-between"
+            >
+              <View>
+                <Text fontSize="md">{title}</Text>
+              </View>
+              <Controller
+                control={methods.control}
+                name={checkBoxName}
+                defaultValue={false}
+                render={({ field: { value, onChange } }) => (
+                  <Checkbox
+                    colorScheme="green"
+                    size="md"
+                    aria-label="Confirmar seleção do produto"
+                    value={value}
+                    onChange={onChange}
+                  />
+                )}
+              />
+            </HStack>
+            {isVisibleDetails && (
+              <HStack justifyContent="space-between" mt="2">
+                <Text color="gray.500">Quantidade: {quantity}</Text>
+                <Text color="gray.500">Preço unidade: R${price}</Text>
+              </HStack>
+            )}
+          </Animated.View>
+        </GestureDetector>
+      </HStack>
       <Modal isOpen={showModal}>
         <Modal.Content maxWidth="400px">
           <Modal.Header bg="green.700">
@@ -203,6 +234,6 @@ export default function ItemCheck({
           </Modal.Footer>
         </Modal.Content>
       </Modal>
-    </>
+    </View>
   );
 }

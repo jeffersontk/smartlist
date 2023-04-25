@@ -3,11 +3,11 @@ import Header from "../components/Header";
 import Categories from "../screens/Categories";
 import { DrawerContent } from "../components/Custom/DrawerContent";
 
-const Drawer = createDrawerNavigator();
+const { Navigator, Screen } = createDrawerNavigator();
 
 export function DrawerRouter() {
   return (
-    <Drawer.Navigator
+    <Navigator
       screenOptions={({ navigation, route }) => ({
         drawerStyle: {
           backgroundColor: "#c6cbef",
@@ -23,14 +23,14 @@ export function DrawerRouter() {
       })}
       drawerContent={DrawerContent}
     >
-      <Drawer.Screen
+      <Screen
         name="Mercearia"
         children={() => <Categories category="grocery" />}
       />
-      <Drawer.Screen
+      <Screen
         name="Condimentos"
         children={() => <Categories category="condiments" />}
       />
-    </Drawer.Navigator>
+    </Navigator>
   );
 }

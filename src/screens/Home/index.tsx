@@ -1,16 +1,15 @@
 import React from "react";
-import { VStack, Text, View, Center } from "native-base";
-import { NavigationContainer } from "@react-navigation/native";
-import { DrawerRouter } from "../../routes/DrawerRoute";
+import { VStack, Center } from "native-base";
+import { DrawerRouter } from "../../routes/drawer.route";
 import CartCurrentPrice from "../../components/CartCurrentPrice";
 
 export default function Home() {
   return (
-    <View flex={1}>
+    <VStack flex={1} w="100%" pb="5">
       <DrawerRouter />
-      <Center py="5" bg="#F2F2F2">
+      <Center pt="5">
         <CartCurrentPrice />
       </Center>
-    </View>
+    </VStack>
   );
 }
