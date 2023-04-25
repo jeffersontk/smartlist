@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ItemCheck from "../../components/ItemCheck";
-import { VStack, FlatList, View, Center, Text } from "native-base";
+import { VStack, FlatList, View, Text } from "native-base";
 import { FormProvider, useForm } from "react-hook-form";
 import axios from "axios";
 import { ListSkeleton } from "../../components/ListSkeleton";
@@ -10,7 +10,10 @@ import IconEntypo from "react-native-vector-icons/Entypo";
 
 interface CategoriesProps {
   category: any;
+  navigation: any;
+  route: any;
 }
+
 interface Product {
   checkboxName: string;
   id: string;
@@ -19,7 +22,11 @@ interface Product {
   name: string;
 }
 
-export default function Categories({ category }: CategoriesProps) {
+export default function Categories({
+  category,
+  navigation,
+  route,
+}: CategoriesProps) {
   const methods = useForm();
   const [listProducts, setListProducts] = useState<any[]>([]);
   const [lastProduct, setLastProduct] = useState<Product>();
@@ -30,11 +37,20 @@ export default function Categories({ category }: CategoriesProps) {
     const url = id
       ? `http://192.168.1.110:3333/${category}?lastId=${id}`
       : `http://192.168.1.110:3333/${category}`;
+
     axios
       .get(url)
       .then((response) => {
         const products = response.data.products;
-        setListProducts([...listProducts, ...products]);
+
+        // filter out any products that already exist in the list
+        const newProducts = products.filter((p: any) => {
+          return listProducts.findIndex((lp) => lp.id === p.id) === -1;
+        });
+
+        // add the filtered new products to the list
+        setListProducts([...listProducts, ...newProducts]);
+
         setLastProduct(products.slice(-1)[0]);
         setIsLoading(false);
       })
@@ -48,29 +64,14 @@ export default function Categories({ category }: CategoriesProps) {
     getCategories();
   }, []);
 
-  if (isLoading) {
-    return <ListSkeleton />;
-  }
-
-  if (listProducts.length === 0) {
-    return (
-      <VStack flex={1} w="100%" pb="5">
-        <Header />
-        <VStack h="69.8%" alignItems="center" justifyContent="center">
-          <IconEntypo name="list" size={64} color="#7C7C8A" />
-          <Text color="#7C7C8A" fontSize={24}>
-            Carrinho vazio
-          </Text>
-        </VStack>
-      </VStack>
-    );
-  }
   return (
-    <View flex={1} w="100%">
-      <VStack w="100%" px="5" h="100%" alignItems="center">
+    <VStack flex={1} w="100%">
+      <Header navigation={navigation} title={route.name} />
+      <VStack w="100%" px="5" h="90%" pb="50" alignItems="center">
         <FormProvider {...methods}>
           <FlatList
             data={listProducts}
+            letterSpacing={4}
             keyExtractor={(product: any) => product.id.toString()}
             renderItem={({ item: product }) => (
               <ItemCheck
@@ -84,8 +85,6 @@ export default function Categories({ category }: CategoriesProps) {
             )}
             initialNumToRender={10}
             maxToRenderPerBatch={10}
-            removeClippedSubviews={true}
-            contentContainerStyle={{ paddingBottom: 10 }}
             showsVerticalScrollIndicator={false}
             onEndReached={() => {
               if (lastProduct) {
@@ -93,9 +92,28 @@ export default function Categories({ category }: CategoriesProps) {
               }
             }}
             width="100%"
+            maxHeight="85%"
+            paddingBottom="15"
+            ListEmptyComponent={() =>
+              !isLoading ? (
+                <VStack flex={1} w="100%" pb="5">
+                  <VStack h="69.8%" alignItems="center" justifyContent="center">
+                    <IconEntypo name="list" size={64} color="#7C7C8A" />
+                    <Text color="#7C7C8A" fontSize={24}>
+                      lista vazio
+                    </Text>
+                  </VStack>
+                </VStack>
+              ) : (
+                <View />
+              )
+            }
+            ListFooterComponent={() =>
+              isLoading ? <ListSkeleton /> : <View pb="5" />
+            }
           />
         </FormProvider>
       </VStack>
-    </View>
+    </VStack>
   );
 }

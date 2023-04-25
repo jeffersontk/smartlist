@@ -1,30 +1,12 @@
-import {
-  Pressable,
-  Checkbox,
-  Text,
-  Modal,
-  FormControl,
-  Input,
-  Button,
-  HStack,
-  View,
-} from "native-base";
-import { Dimensions } from "react-native";
-import React, { useEffect, useState } from "react";
+import { Checkbox, Text, Button, HStack, View, VStack } from "native-base";
+import React, { useEffect, useRef, useState } from "react";
 import { useFormContext, Controller } from "react-hook-form";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
-import {
-  GestureDetector,
-  Gesture,
-  Directions,
-} from "react-native-gesture-handler";
+
+import { Swipeable } from "react-native-gesture-handler";
 
 import { useCart } from "../../context/cartProvider";
-import { styles } from "./styles";
+
+import ModalAddInList from "../Modal";
 
 interface props {
   id: string;
@@ -34,9 +16,6 @@ interface props {
   checkBoxName: string;
 }
 
-const START = 0;
-const LIMIT = Dimensions.get("window").width - 350;
-
 export default function ItemCheck({
   id,
   title,
@@ -45,50 +24,15 @@ export default function ItemCheck({
   checkBoxName,
 }: props) {
   const methods = useFormContext();
-  const { addItem, removeItem } = useCart();
+  const { removeItem } = useCart();
   const [showModal, setShowModal] = useState(false);
-  const [showButton, setShowButton] = useState(false);
+  const [disableItem, setDisableItem] = useState(false);
+  const swipeableRef = useRef<any>(null);
 
   const price = methods.watch(inputNamePrice);
   const quantity = methods.watch(inputNameQuantity);
   const confirmed = methods.watch(checkBoxName);
   const isVisibleDetails = price !== "0" && quantity && confirmed;
-
-  const handleConfirm = (data: any) => {
-    console.log("data", data);
-    const checkedItems = Object.entries(data)
-      .filter(([key, value]) => key.startsWith("check") && value)
-      .map(([key]) => {
-        const item = key.replace("check", "");
-        let quantity = 1;
-
-        if (
-          data.hasOwnProperty(
-            `qnt${item.charAt(0).toUpperCase()}${item.slice(1)}`
-          )
-        ) {
-          const quantityValue =
-            data[`qnt${item.charAt(0).toUpperCase()}${item.slice(1)}`];
-          quantity = parseFloat(quantityValue) || 0;
-        }
-        const priceValue =
-          data[`price${item.charAt(0).toUpperCase()}${item.slice(1)}`];
-        const price = parseFloat(priceValue) || 0;
-        return {
-          id,
-          name: title,
-          quantity,
-          price,
-        };
-      });
-
-    if (checkedItems.length > 0) {
-      addItem(checkedItems);
-    }
-    if (price !== 0 && price !== undefined && !isNaN(price)) {
-      setShowModal(false);
-    }
-  };
 
   useEffect(() => {
     if (confirmed) {
@@ -98,50 +42,60 @@ export default function ItemCheck({
     }
   }, [confirmed]);
 
-  const position = useSharedValue(0);
+  const handleDisableItem = () => {
+    setDisableItem(!disableItem);
+    if (swipeableRef.current) {
+      swipeableRef.current.close();
+    }
+  };
 
-  const directionRight = Gesture.Fling()
-    .direction(Directions.RIGHT)
-    .onStart(() => {
-      position.value = withTiming(LIMIT, { duration: 500 });
-      setShowButton(true);
-    });
-  const directionLeft = Gesture.Fling()
-    .direction(Directions.LEFT)
-    .onStart(() => {
-      position.value = withTiming(START, { duration: 500 });
-      setShowButton(false);
-    });
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: position.value }],
-  }));
+  const LeftSwipeActions = () => {
+    return (
+      <Button
+        background={!disableItem ? "red.500" : "green.600"}
+        h="58"
+        mr="2"
+        mt="0.5"
+        onPress={handleDisableItem}
+      >
+        <Text color="white" width={70} textAlign="center" bold>
+          {!disableItem ? "Tenho em casa" : "Desmarcar"}
+        </Text>
+      </Button>
+    );
+  };
 
   return (
-    <View width="100%">
-      <HStack>
-        <Button
-          display={showButton ? "block" : "none"}
-          background="green.600"
-          h="60"
-          mr="2"
+    <>
+      <HStack w="100%" mb="5">
+        <Swipeable
+          ref={swipeableRef}
+          renderLeftActions={LeftSwipeActions}
+          onSwipeableOpen={() => handleDisableItem}
         >
-          <Text color="white" width={60} textAlign="center">
-            Tenho em casa
-          </Text>
-        </Button>
-        <GestureDetector
-          gesture={Gesture.Exclusive(directionRight, directionLeft)}
-        >
-          <Animated.View style={[animatedStyle, styles.container]}>
+          <VStack
+            w="100%"
+            maxW={360}
+            bg="#F2F2F2"
+            px="5"
+            borderWidth={1}
+            borderColor="gray.300"
+            borderRadius={8}
+          >
             <HStack
               alignItems="center"
               h="60"
-              px="5"
+              w="full"
               justifyContent="space-between"
             >
               <View>
-                <Text fontSize="md">{title}</Text>
+                <Text
+                  fontSize="md"
+                  strikeThrough={disableItem}
+                  color={disableItem ? "gray.400" : "gray.700"}
+                >
+                  {title}
+                </Text>
               </View>
               <Controller
                 control={methods.control}
@@ -153,87 +107,29 @@ export default function ItemCheck({
                     size="md"
                     aria-label="Confirmar seleção do produto"
                     value={value}
+                    isDisabled={disableItem}
                     onChange={onChange}
                   />
                 )}
               />
             </HStack>
             {isVisibleDetails && (
-              <HStack justifyContent="space-between" mt="2">
+              <HStack justifyContent="space-between" mb="2">
                 <Text color="gray.500">Quantidade: {quantity}</Text>
                 <Text color="gray.500">Preço unidade: R${price}</Text>
               </HStack>
             )}
-          </Animated.View>
-        </GestureDetector>
+          </VStack>
+        </Swipeable>
       </HStack>
-      <Modal isOpen={showModal}>
-        <Modal.Content maxWidth="400px">
-          <Modal.Header bg="green.700">
-            <Text color="white" fontFamily="heading" fontSize="lg">
-              {title}
-            </Text>
-          </Modal.Header>
-          <Modal.Body>
-            <HStack flexDirection="row" space={2}>
-              <FormControl
-                isRequired
-                maxW="48%"
-                isInvalid={!!methods.formState.errors[inputNamePrice]}
-              >
-                <FormControl.Label>Preço</FormControl.Label>
-                <Controller
-                  control={methods.control}
-                  name={inputNamePrice}
-                  defaultValue={price ?? "0"}
-                  rules={{ required: true }}
-                  render={({ field }) => (
-                    <Input
-                      keyboardType="numeric"
-                      onChangeText={field.onChange}
-                      value={field.value}
-                      isInvalid={!!methods.formState.errors[inputNamePrice]}
-                    />
-                  )}
-                />
-                <FormControl.ErrorMessage>
-                  {methods.formState.errors[inputNamePrice]?.message ||
-                    "Campo obrigatório"}
-                </FormControl.ErrorMessage>
-              </FormControl>
-
-              <FormControl maxW="48%">
-                <FormControl.Label>Quantidade</FormControl.Label>
-                <Controller
-                  control={methods.control}
-                  name={inputNameQuantity}
-                  defaultValue={quantity ?? "1"}
-                  render={({ field: { onChange, value } }) => (
-                    <Input
-                      keyboardType="numeric"
-                      onChangeText={onChange}
-                      value={value}
-                    />
-                  )}
-                />
-              </FormControl>
-            </HStack>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button.Group>
-              <Button
-                w="100%"
-                bg="green.700"
-                onPress={methods.handleSubmit(handleConfirm)}
-                aria-label="Confirmar"
-                isDisabled={!methods.formState.isValid}
-              >
-                Confirmar
-              </Button>
-            </Button.Group>
-          </Modal.Footer>
-        </Modal.Content>
-      </Modal>
-    </View>
+      <ModalAddInList
+        id={id}
+        inputNamePrice={inputNamePrice}
+        inputNameQuantity={inputNameQuantity}
+        setShowModal={setShowModal}
+        showModal={showModal}
+        title={title}
+      />
+    </>
   );
 }

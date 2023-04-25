@@ -67,6 +67,16 @@ export default function MyCart() {
               </Text>
             </HStack>
           )}
+          ListEmptyComponent={() => (
+            <VStack flex={1} w="100%" pb="5">
+              <VStack h="69.8%" alignItems="center" justifyContent="center">
+                <Icon name="cart-off" size={64} color="#7C7C8A" />
+                <Text color="#7C7C8A" fontSize={24}>
+                  Carrinho vazio
+                </Text>
+              </VStack>
+            </VStack>
+          )}
         />
       </VStack>
       <Center>
