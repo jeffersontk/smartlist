@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ItemCheck from "../../components/ItemCheck";
-import { VStack, FlatList, View, Text } from "native-base";
-import { FormProvider, useForm } from "react-hook-form";
+import { VStack, FlatList, View, Text, Input } from "native-base";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import axios from "axios";
 import { ListSkeleton } from "../../components/ListSkeleton";
 import Header from "../../components/Header";
@@ -31,13 +31,34 @@ export default function Categories({
   const [listProducts, setListProducts] = useState<any[]>([]);
   const [lastProduct, setLastProduct] = useState<Product>();
   const [isLoading, setIsLoading] = useState(false);
+  const { watch } = methods;
+
+  const searchProduct: string = watch("searchProduct");
+  const [filteredProducts, setFilteredProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (searchProduct && searchProduct.length > 0) {
+      const filtered = listProducts.filter((product) =>
+        product.name.toLowerCase().includes(searchProduct.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    } else {
+      setFilteredProducts(listProducts);
+    }
+  }, [searchProduct, listProducts]);
+
+  // Renderizar a lista de produtos usando a lista original ou a lista filtrada, dependendo do valor de searchProduct
+
+  const productList =
+    searchProduct && searchProduct.length > 0
+      ? filteredProducts
+      : listProducts || [];
 
   const getCategories = (id?: string) => {
     setIsLoading(true);
     const url = id
       ? `https://expressjs-server-production-4171.up.railway.app/products?category=${category}&lastId=${id}`
       : `https://expressjs-server-production-4171.up.railway.app/products?category=${category}`;
-
     axios
       .get(url)
       .then((response) => {
@@ -66,53 +87,52 @@ export default function Categories({
 
   return (
     <VStack flex={1} w="100%">
-      <Header navigation={navigation} title={route.name} />
+      <FormProvider {...methods}>
+        <Header navigation={navigation} title={route.name} />
+      </FormProvider>
       <VStack w="100%" px="5" h="90%" pb="50" alignItems="center">
-        <FormProvider {...methods}>
-          <FlatList
-            data={listProducts}
-            letterSpacing={4}
-            keyExtractor={(product: any) => product.id.toString()}
-            renderItem={({ item: product }) => (
-              <ItemCheck
-                key={product.id}
-                id={product.id}
-                title={product.name}
-                inputNamePrice={product.inputNamePrice}
-                inputNameQuantity={product.inputNameQuantity}
-                checkBoxName={product.checkboxName}
-              />
-            )}
-            initialNumToRender={10}
-            maxToRenderPerBatch={10}
-            showsVerticalScrollIndicator={false}
-            onEndReached={() => {
-              if (lastProduct) {
-                getCategories(lastProduct.id);
-              }
-            }}
-            width="100%"
-            maxHeight="85%"
-            paddingBottom="15"
-            ListEmptyComponent={() =>
-              !isLoading ? (
-                <VStack flex={1} w="100%" pb="5">
-                  <VStack h="69.8%" alignItems="center" justifyContent="center">
-                    <IconEntypo name="list" size={64} color="#7C7C8A" />
-                    <Text color="#7C7C8A" fontSize={24}>
-                      lista vazio
-                    </Text>
-                  </VStack>
+        <FlatList
+          data={productList}
+          letterSpacing={4}
+          keyExtractor={(product: any) => product.id.toString()}
+          renderItem={({ item: product }) => (
+            <ItemCheck
+              key={product.id}
+              id={product.id}
+              title={product.name}
+              inputNamePrice={product.inputNamePrice}
+              inputNameQuantity={product.inputNameQuantity}
+              checkBoxName={product.checkboxName}
+            />
+          )}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          showsVerticalScrollIndicator={false}
+          onEndReached={() => {
+            if (lastProduct) {
+              getCategories(lastProduct.id);
+            }
+          }}
+          maxHeight="85%"
+          paddingBottom="15"
+          ListEmptyComponent={() =>
+            !isLoading ? (
+              <VStack flex={1} w="100%" pb="5">
+                <VStack h="69.8%" alignItems="center" justifyContent="center">
+                  <IconEntypo name="list" size={64} color="#7C7C8A" />
+                  <Text color="#7C7C8A" fontSize={24}>
+                    lista vazio
+                  </Text>
                 </VStack>
-              ) : (
-                <View />
-              )
-            }
-            ListFooterComponent={() =>
-              isLoading ? <ListSkeleton /> : <View pb="5" />
-            }
-          />
-        </FormProvider>
+              </VStack>
+            ) : (
+              <View />
+            )
+          }
+          ListFooterComponent={() =>
+            isLoading ? <ListSkeleton /> : <View pb="5" />
+          }
+        />
       </VStack>
     </VStack>
   );

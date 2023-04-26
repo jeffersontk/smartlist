@@ -1,16 +1,13 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
-import Header from "../components/Header";
 import Categories from "../screens/Categories";
 import { DrawerContent } from "../components/Custom/DrawerContent";
-import CartCurrentPrice from "../components/CartCurrentPrice";
-import { Center } from "native-base";
 
 const { Navigator, Screen } = createDrawerNavigator();
 
 export function DrawerRouter() {
   return (
     <Navigator
-      screenOptions={({ navigation, route }) => ({
+      screenOptions={() => ({
         drawerStyle: {
           backgroundColor: "#c6cbef",
           width: 240,
@@ -74,7 +71,7 @@ export function DrawerRouter() {
       <Screen
         name="Congelados"
         children={({ navigation, route }) => (
-          <Categories category="Frozen" navigation={navigation} route={route} />
+          <Categories category="frozen" navigation={navigation} route={route} />
         )}
       />
       <Screen

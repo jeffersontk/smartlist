@@ -11,8 +11,12 @@ import {
 } from "native-base";
 import Icon from "react-native-vector-icons/FontAwesome";
 import IconEntypo from "react-native-vector-icons/Entypo";
+import { Controller, useFormContext } from "react-hook-form";
 
 export default function Header({ navigation, title }: any) {
+  const methods = useFormContext();
+  const { control } = methods;
+
   return (
     <VStack>
       <VStack
@@ -48,23 +52,33 @@ export default function Header({ navigation, title }: any) {
               paddingLeft: 15,
             }}
           />
-          <Input
-            w={{
-              base: "100%",
-            }}
-            mt="2"
-            fontSize="md"
-            color="green.500"
-            variant="rounded"
-            bg="white"
-            placeholder="Procurando algum produto em especifico"
-            placeholderTextColor="green.500"
-            borderLeftWidth={0}
-            _focus={{
-              bg: "white",
-              borderWidth: 1,
-              borderColor: "green.500",
-            }}
+          <Controller
+            control={control}
+            render={({ field: { onChange, onBlur, value } }: any) => (
+              <Input
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                w={{
+                  base: "100%",
+                }}
+                mt="2"
+                fontSize="md"
+                color="green.500"
+                borderTopRightRadius="full"
+                borderBottomRightRadius="full"
+                bg="white"
+                placeholder="Procurando algum produto em especifico"
+                placeholderTextColor="green.500"
+                borderLeftWidth={0}
+                _focus={{
+                  bg: "white",
+                  borderWidth: 1,
+                  borderColor: "green.500",
+                }}
+              />
+            )}
+            name="searchProduct"
           />
         </InputGroup>
       </VStack>
