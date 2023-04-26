@@ -35,8 +35,8 @@ export default function Categories({
   const getCategories = (id?: string) => {
     setIsLoading(true);
     const url = id
-      ? `http://192.168.1.110:3333/${category}?lastId=${id}`
-      : `http://192.168.1.110:3333/${category}`;
+      ? `https://expressjs-server-production-4171.up.railway.app/products?category=${category}&lastId=${id}`
+      : `https://expressjs-server-production-4171.up.railway.app/products?category=${category}`;
 
     axios
       .get(url)
