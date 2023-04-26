@@ -47,8 +47,6 @@ export default function Categories({
     }
   }, [searchProduct, listProducts]);
 
-  // Renderizar a lista de produtos usando a lista original ou a lista filtrada, dependendo do valor de searchProduct
-
   const productList =
     searchProduct && searchProduct.length > 0
       ? filteredProducts
@@ -89,51 +87,52 @@ export default function Categories({
     <VStack flex={1} w="100%">
       <FormProvider {...methods}>
         <Header navigation={navigation} title={route.name} />
-      </FormProvider>
-      <VStack w="100%" px="5" h="90%" pb="50" alignItems="center">
-        <FlatList
-          data={productList}
-          letterSpacing={4}
-          keyExtractor={(product: any) => product.id.toString()}
-          renderItem={({ item: product }) => (
-            <ItemCheck
-              key={product.id}
-              id={product.id}
-              title={product.name}
-              inputNamePrice={product.inputNamePrice}
-              inputNameQuantity={product.inputNameQuantity}
-              checkBoxName={product.checkboxName}
-            />
-          )}
-          initialNumToRender={10}
-          maxToRenderPerBatch={10}
-          showsVerticalScrollIndicator={false}
-          onEndReached={() => {
-            if (lastProduct) {
-              getCategories(lastProduct.id);
-            }
-          }}
-          maxHeight="85%"
-          paddingBottom="15"
-          ListEmptyComponent={() =>
-            !isLoading ? (
-              <VStack flex={1} w="100%" pb="5">
-                <VStack h="69.8%" alignItems="center" justifyContent="center">
-                  <IconEntypo name="list" size={64} color="#7C7C8A" />
-                  <Text color="#7C7C8A" fontSize={24}>
-                    lista vazio
-                  </Text>
+
+        <VStack w="100%" px="5" h="90%" pb="50" alignItems="center">
+          <FlatList
+            data={productList}
+            letterSpacing={4}
+            keyExtractor={(product: any) => product.id.toString()}
+            renderItem={({ item: product }) => (
+              <ItemCheck
+                key={product.id}
+                id={product.id}
+                title={product.name}
+                inputNamePrice={product.inputNamePrice}
+                inputNameQuantity={product.inputNameQuantity}
+                checkBoxName={product.checkboxName}
+              />
+            )}
+            initialNumToRender={10}
+            maxToRenderPerBatch={10}
+            showsVerticalScrollIndicator={false}
+            onEndReached={() => {
+              if (lastProduct) {
+                getCategories(lastProduct.id);
+              }
+            }}
+            maxHeight="85%"
+            paddingBottom="15"
+            ListEmptyComponent={() =>
+              !isLoading ? (
+                <VStack flex={1} w="100%" pb="5">
+                  <VStack h="69.8%" alignItems="center" justifyContent="center">
+                    <IconEntypo name="list" size={64} color="#7C7C8A" />
+                    <Text color="#7C7C8A" fontSize={24}>
+                      lista vazio
+                    </Text>
+                  </VStack>
                 </VStack>
-              </VStack>
-            ) : (
-              <View />
-            )
-          }
-          ListFooterComponent={() =>
-            isLoading ? <ListSkeleton /> : <View pb="5" />
-          }
-        />
-      </VStack>
+              ) : (
+                <View />
+              )
+            }
+            ListFooterComponent={() =>
+              isLoading ? <ListSkeleton /> : <View pb="5" />
+            }
+          />
+        </VStack>
+      </FormProvider>
     </VStack>
   );
 }

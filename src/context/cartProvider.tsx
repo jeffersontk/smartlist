@@ -38,7 +38,7 @@ const CartProvider = ({ children }: CartProviderProps) => {
           (prevItem) => prevItem.id === newItem.id
         );
         if (index !== -1) {
-          prevItems[index].quantity += newItem.quantity;
+          prevItems[index] = newItem;
         } else {
           prevItems.push(newItem);
         }

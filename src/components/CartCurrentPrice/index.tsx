@@ -14,13 +14,16 @@ export default function CartCurrentPrice() {
       alignItems="center"
       justifyContent="space-between"
       flexDirection="row"
-      w="320px"
+      w="100%"
     >
       <Text fontSize="xl" color="green.100">
         Total no carrinho
       </Text>
       <Text fontSize="2xl" color="green.100" fontWeight="normal">
-        R$ {total}
+        {new Intl.NumberFormat("pt-BR", {
+          style: "currency",
+          currency: "BRL",
+        }).format(total)}
       </Text>
     </HStack>
   );

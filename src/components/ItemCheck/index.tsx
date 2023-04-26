@@ -1,6 +1,6 @@
 import { Checkbox, Text, Button, HStack, View, VStack } from "native-base";
 import React, { useEffect, useRef, useState } from "react";
-import { FormProvider, Controller, useForm } from "react-hook-form";
+import { FormProvider, Controller, useFormContext } from "react-hook-form";
 
 import { Swipeable } from "react-native-gesture-handler";
 
@@ -23,7 +23,7 @@ export default function ItemCheck({
   inputNameQuantity,
   checkBoxName,
 }: props) {
-  const methods = useForm();
+  const methods = useFormContext();
   const { removeItem } = useCart();
   const [showModal, setShowModal] = useState(false);
   const [disableItem, setDisableItem] = useState(false);
@@ -66,7 +66,7 @@ export default function ItemCheck({
   };
 
   return (
-    <FormProvider {...methods}>
+    <>
       <HStack w="100%" mb="5">
         <Swipeable
           ref={swipeableRef}
@@ -116,7 +116,13 @@ export default function ItemCheck({
             {isVisibleDetails && (
               <HStack justifyContent="space-between" mb="2">
                 <Text color="gray.500">Quantidade: {quantity}</Text>
-                <Text color="gray.500">Preço unidade: R${price}</Text>
+                <Text color="gray.500">
+                  Preço unidade:
+                  {new Intl.NumberFormat("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  }).format(price)}
+                </Text>
               </HStack>
             )}
           </VStack>
@@ -130,6 +136,6 @@ export default function ItemCheck({
         showModal={showModal}
         title={title}
       />
-    </FormProvider>
+    </>
   );
 }
