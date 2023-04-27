@@ -1,62 +1,116 @@
-import { Checkbox, Text, Button, HStack, View, VStack } from "native-base";
-import React, { useEffect, useRef, useState } from "react";
-import { FormProvider, Controller, useFormContext } from "react-hook-form";
+import {
+  Checkbox,
+  Text,
+  Button,
+  HStack,
+  View,
+  VStack,
+  useDisclose,
+} from "native-base";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useFormContext } from "react-hook-form";
+import Icon from "react-native-vector-icons/Feather";
 
 import { Swipeable } from "react-native-gesture-handler";
 
 import { useCart } from "../../context/cartProvider";
 
-import ModalAddInList from "../Modal";
+import ModalAddInList from "../Modal/AddList";
+import ModalIHaveAtHome from "../Modal/IHaveAtHome";
+import { TouchableOpacity } from "react-native";
 
 interface props {
   id: string;
   title: string;
-  inputNamePrice: string;
-  inputNameQuantity: string;
-  checkBoxName: string;
 }
 
-export default function ItemCheck({
-  id,
-  title,
-  inputNamePrice,
-  inputNameQuantity,
-  checkBoxName,
-}: props) {
+export default function ItemCheck({ id, title }: props) {
   const methods = useFormContext();
   const { removeItem } = useCart();
-  const [showModal, setShowModal] = useState(false);
+  const {
+    isOpen: isOpenAddList,
+    onClose: onCloseAddList,
+    onOpen: onOpenAddList,
+  } = useDisclose();
+  const {
+    isOpen: isOpenIHaveAtHome,
+    onClose: onCloseIHaveAtHome,
+    onOpen: onOpenIHaveAtHome,
+  } = useDisclose();
   const [disableItem, setDisableItem] = useState(false);
   const swipeableRef = useRef<any>(null);
 
-  const price = methods.watch(inputNamePrice);
-  const quantity = methods.watch(inputNameQuantity);
-  const confirmed = methods.watch(checkBoxName);
-  const isVisibleDetails = price !== "0" && quantity && confirmed;
+  const price = methods.watch(`${id}price`);
+  const quantity = methods.watch(`${id}quantity`);
+  const [showQuantityAndPrice, setShowQuantityAndPrice] = useState(false);
+  const [showCurrentQuantity, setShowCurrentQuantity] = useState(false);
 
-  useEffect(() => {
-    if (confirmed) {
-      setShowModal(true);
-    } else {
-      removeItem(id);
-    }
-  }, [confirmed]);
+  const currentQuantity = methods.watch(`${id}currentQuantity`);
 
-  const handleDisableItem = () => {
-    setDisableItem(!disableItem);
+  const handleINeedToBuy = () => {
+    onCloseIHaveAtHome();
     if (swipeableRef.current) {
       swipeableRef.current.close();
     }
   };
 
+  const handleIDontNeedToBuy = () => {
+    setDisableItem(!disableItem);
+    if (price && +price.length <= 0) {
+      methods.setValue(`${id}price`, 0);
+    }
+    if (currentQuantity && +currentQuantity.length <= 0) {
+      setShowCurrentQuantity(true);
+    }
+    removeItem(id);
+    onCloseIHaveAtHome();
+    if (swipeableRef.current) {
+      swipeableRef.current.close();
+    }
+  };
+
+  const handleEnable = () => {
+    setDisableItem(false);
+    if (swipeableRef.current) {
+      swipeableRef.current.close();
+    }
+  };
+  const handleRemoveItem = () => {
+    removeItem(id);
+    methods.setValue(`${id}price`, 0);
+    setShowQuantityAndPrice(false);
+    if (swipeableRef.current) {
+      swipeableRef.current.close();
+    }
+  };
+
+  useMemo(() => {
+    if (price && price.length > 0) {
+      setShowQuantityAndPrice(true);
+    }
+  }, [price]);
+
   const LeftSwipeActions = () => {
+    if (showQuantityAndPrice) {
+      return (
+        <Button
+          background={"red.500"}
+          h="100%"
+          mr="2"
+          onPress={handleRemoveItem}
+        >
+          <Text color="white" width={70} textAlign="center" bold>
+            remover
+          </Text>
+        </Button>
+      );
+    }
     return (
       <Button
         background={!disableItem ? "red.500" : "green.600"}
-        h="58"
+        h="100%"
         mr="2"
-        mt="0.5"
-        onPress={handleDisableItem}
+        onPress={!disableItem ? onOpenIHaveAtHome : handleEnable}
       >
         <Text color="white" width={70} textAlign="center" bold>
           {!disableItem ? "Tenho em casa" : "Desmarcar"}
@@ -68,11 +122,7 @@ export default function ItemCheck({
   return (
     <>
       <HStack w="100%" mb="5">
-        <Swipeable
-          ref={swipeableRef}
-          renderLeftActions={LeftSwipeActions}
-          onSwipeableOpen={() => handleDisableItem}
-        >
+        <Swipeable ref={swipeableRef} renderLeftActions={LeftSwipeActions}>
           <VStack
             w="100%"
             maxW={360}
@@ -97,23 +147,21 @@ export default function ItemCheck({
                   {title}
                 </Text>
               </View>
-              <Controller
-                control={methods.control}
-                name={checkBoxName}
-                defaultValue={false}
-                render={({ field: { value, onChange } }) => (
-                  <Checkbox
-                    colorScheme="green"
-                    size="md"
-                    aria-label="Confirmar seleção do produto"
-                    value={value}
-                    isDisabled={disableItem}
-                    onChange={onChange}
-                  />
+              <TouchableOpacity
+                onPress={() => {
+                  if (!disableItem) {
+                    onOpenAddList();
+                  }
+                }}
+              >
+                {showQuantityAndPrice ? (
+                  <Icon name="check-square" size={28} color="#219653" />
+                ) : (
+                  <Icon name="square" size={28} color="#c4c4c4" />
                 )}
-              />
+              </TouchableOpacity>
             </HStack>
-            {isVisibleDetails && (
+            {showQuantityAndPrice && (
               <HStack justifyContent="space-between" mb="2">
                 <Text color="gray.500">Quantidade: {quantity}</Text>
                 <Text color="gray.500">
@@ -125,16 +173,28 @@ export default function ItemCheck({
                 </Text>
               </HStack>
             )}
+            {showCurrentQuantity && +currentQuantity.length <= 0 && (
+              <HStack justifyContent="space-between" mb="2">
+                <Text color="gray.500">
+                  Quantidade em casa: {currentQuantity}
+                </Text>
+              </HStack>
+            )}
           </VStack>
         </Swipeable>
       </HStack>
       <ModalAddInList
         id={id}
-        inputNamePrice={inputNamePrice}
-        inputNameQuantity={inputNameQuantity}
-        setShowModal={setShowModal}
-        showModal={showModal}
+        onClose={onCloseAddList}
+        isOpen={isOpenAddList}
         title={title}
+      />
+      <ModalIHaveAtHome
+        id={id}
+        isOpen={isOpenIHaveAtHome}
+        onClose={onCloseIHaveAtHome}
+        action1={handleIDontNeedToBuy}
+        action2={handleINeedToBuy}
       />
     </>
   );

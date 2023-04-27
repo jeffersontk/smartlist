@@ -1,49 +1,30 @@
 import { Button, FormControl, HStack, Input, Modal, Text } from "native-base";
 import React from "react";
 import { Controller, useFormContext } from "react-hook-form";
-import { useCart } from "../../context/cartProvider";
+import { useCart } from "../../../context/cartProvider";
 
 interface modalProps {
-  showModal: boolean;
-  setShowModal: any;
+  isOpen: boolean;
+  onClose: any;
   id: string;
   title: string;
-  inputNamePrice: string;
-  inputNameQuantity: string;
 }
 
 export default function ModalAddInList({
-  showModal,
-  setShowModal,
+  isOpen,
+  onClose,
   id,
   title,
-  inputNamePrice,
-  inputNameQuantity,
 }: modalProps) {
   const methods = useFormContext();
-  const price = methods.watch(inputNamePrice);
-  const quantity = methods.watch(inputNameQuantity);
+  const price = methods.watch(`${id}price`);
+  const quantity = methods.watch(`${id}quantity`);
   const { addItem } = useCart();
 
   const handleConfirm = (data: any) => {
     const checkedItems = Object.entries(data)
-      .filter(([key, value]) => key.startsWith("check") && value)
-      .map(([key]) => {
-        const item = key.replace("check", "");
-        let quantity = 1;
-
-        if (
-          data.hasOwnProperty(
-            `qnt${item.charAt(0).toUpperCase()}${item.slice(1)}`
-          )
-        ) {
-          const quantityValue =
-            data[`qnt${item.charAt(0).toUpperCase()}${item.slice(1)}`];
-          quantity = parseFloat(quantityValue) || 0;
-        }
-        const priceValue =
-          data[`price${item.charAt(0).toUpperCase()}${item.slice(1)}`];
-        const price = parseFloat(priceValue) || 0;
+      .filter(([key, value]) => key.startsWith(id) && value)
+      .map(() => {
         return {
           id,
           name: title,
@@ -51,17 +32,16 @@ export default function ModalAddInList({
           price,
         };
       });
-
     if (checkedItems.length > 0) {
       addItem(checkedItems);
     }
     if (price !== 0 && price !== undefined && !isNaN(price)) {
-      setShowModal(false);
+      onClose();
     }
   };
 
   return (
-    <Modal isOpen={showModal}>
+    <Modal isOpen={isOpen}>
       <Modal.Content maxWidth="400px">
         <Modal.Header bg="green.700">
           <Text color="white" fontFamily="heading" fontSize="lg">
@@ -73,12 +53,12 @@ export default function ModalAddInList({
             <FormControl
               isRequired
               maxW="48%"
-              isInvalid={!!methods.formState.errors[inputNamePrice]}
+              isInvalid={!!methods.formState.errors[`${id}price`]}
             >
               <FormControl.Label>Preço</FormControl.Label>
               <Controller
                 control={methods.control}
-                name={inputNamePrice}
+                name={`${id}price`}
                 defaultValue={price ?? "0"}
                 rules={{ required: true }}
                 render={({ field }) => (
@@ -86,12 +66,12 @@ export default function ModalAddInList({
                     keyboardType="numeric"
                     onChangeText={field.onChange}
                     value={field.value}
-                    isInvalid={!!methods.formState.errors[inputNamePrice]}
+                    isInvalid={!!methods.formState.errors[`${id}price`]}
                   />
                 )}
               />
               <FormControl.ErrorMessage>
-                {methods.formState.errors[inputNamePrice]?.message ||
+                {methods.formState.errors[`${id}price`]?.message ||
                   "Campo obrigatório"}
               </FormControl.ErrorMessage>
             </FormControl>
@@ -100,7 +80,7 @@ export default function ModalAddInList({
               <FormControl.Label>Quantidade</FormControl.Label>
               <Controller
                 control={methods.control}
-                name={inputNameQuantity}
+                name={`${id}quantity`}
                 defaultValue={quantity ?? "1"}
                 render={({ field: { onChange, value } }) => (
                   <Input

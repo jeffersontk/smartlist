@@ -98,9 +98,6 @@ export default function Categories({
                 key={product.id}
                 id={product.id}
                 title={product.name}
-                inputNamePrice={product.inputNamePrice}
-                inputNameQuantity={product.inputNameQuantity}
-                checkBoxName={product.checkboxName}
               />
             )}
             initialNumToRender={10}
