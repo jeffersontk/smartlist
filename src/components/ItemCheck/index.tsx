@@ -7,7 +7,7 @@ import {
   VStack,
   useDisclose,
 } from "native-base";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import Icon from "react-native-vector-icons/Feather";
 
@@ -24,7 +24,7 @@ interface props {
   title: string;
 }
 
-export default function ItemCheck({ id, title }: props) {
+export function Product({ id, title }: props) {
   const methods = useFormContext();
   const { removeItem } = useCart();
   const {
@@ -48,6 +48,7 @@ export default function ItemCheck({ id, title }: props) {
   const currentQuantity = methods.watch(`${id}currentQuantity`);
 
   const handleINeedToBuy = () => {
+    setShowCurrentQuantity(true);
     onCloseIHaveAtHome();
     if (swipeableRef.current) {
       swipeableRef.current.close();
@@ -56,10 +57,10 @@ export default function ItemCheck({ id, title }: props) {
 
   const handleIDontNeedToBuy = () => {
     setDisableItem(!disableItem);
-    if (price && +price.length <= 0) {
+    if (price && +price <= 0) {
       methods.setValue(`${id}price`, 0);
     }
-    if (currentQuantity && +currentQuantity.length <= 0) {
+    if (currentQuantity && +currentQuantity <= 0) {
       setShowCurrentQuantity(true);
     }
     removeItem(id);
@@ -75,17 +76,24 @@ export default function ItemCheck({ id, title }: props) {
       swipeableRef.current.close();
     }
   };
+
   const handleRemoveItem = () => {
     removeItem(id);
-    methods.setValue(`${id}price`, 0);
+    methods.setValue(`${id}price`, "0");
     setShowQuantityAndPrice(false);
     if (swipeableRef.current) {
       swipeableRef.current.close();
     }
   };
 
+  const handleOpenAddToList = () => {
+    if (!disableItem || +price == 0) {
+      onOpenAddList();
+    }
+  };
+
   useMemo(() => {
-    if (price && price.length > 0) {
+    if (price != null && +price > 0) {
       setShowQuantityAndPrice(true);
     }
   }, [price]);
@@ -148,11 +156,8 @@ export default function ItemCheck({ id, title }: props) {
                 </Text>
               </View>
               <TouchableOpacity
-                onPress={() => {
-                  if (!disableItem) {
-                    onOpenAddList();
-                  }
-                }}
+                onPress={handleOpenAddToList}
+                disabled={disableItem}
               >
                 {showQuantityAndPrice ? (
                   <Icon name="check-square" size={28} color="#219653" />
@@ -163,7 +168,7 @@ export default function ItemCheck({ id, title }: props) {
             </HStack>
             {showQuantityAndPrice && (
               <HStack justifyContent="space-between" mb="2">
-                <Text color="gray.500">Quantidade: {quantity}</Text>
+                <Text color="gray.500">Quant: {quantity}</Text>
                 <Text color="gray.500">
                   Preço unidade:
                   {new Intl.NumberFormat("pt-BR", {
@@ -173,7 +178,7 @@ export default function ItemCheck({ id, title }: props) {
                 </Text>
               </HStack>
             )}
-            {showCurrentQuantity && +currentQuantity.length <= 0 && (
+            {showCurrentQuantity && currentQuantity > 0 && (
               <HStack justifyContent="space-between" mb="2">
                 <Text color="gray.500">
                   Quantidade em casa: {currentQuantity}
@@ -199,3 +204,7 @@ export default function ItemCheck({ id, title }: props) {
     </>
   );
 }
+
+/* export const Product = memo(ProductComponent, (prevProps, nextProps) => {
+  return Object.is(prevProps, nextProps);
+}); */

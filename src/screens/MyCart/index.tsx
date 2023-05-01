@@ -53,14 +53,14 @@ export default function MyCart() {
         <SimpleHeader />
       </FormProvider>
       <VStack px="5" pb="4" h="69.8%" alignItems="center">
-        <HStack w="100%" my="4" justifyContent="space-around">
-          <Text fontSize="lg" w="33%">
+        <HStack w="100%" my="4" px="2" justifyContent="space-around">
+          <Text fontSize="lg" w="45%" color="green.700">
             Produto
           </Text>
-          <Text fontSize="lg" w="33%" textAlign="center">
-            Quantidade
+          <Text fontSize="lg" w="20%" color="green.700">
+            Quant.
           </Text>
-          <Text fontSize="lg" w="33%" textAlign="center">
+          <Text fontSize="lg" w="35%" color="green.700">
             Preço
           </Text>
         </HStack>
@@ -72,23 +72,41 @@ export default function MyCart() {
           removeClippedSubviews={true}
           contentContainerStyle={{ paddingBottom: 10 }}
           showsVerticalScrollIndicator={false}
-          renderItem={({ item: product }) => (
+          renderItem={({ item: product, index }) => (
             <HStack
               key={product.id}
               w="100%"
               justifyContent="space-around"
-              borderBottomWidth={1}
-              borderBottomColor="gray.300"
-              paddingY={4}
+              bg={index % 2 == 0 ? "white" : "#219653"}
+              padding={4}
+              rounded="md"
+              mb={4}
             >
-              <Text fontSize="lg" w="33%" isTruncated>
+              <Text
+                fontSize="lg"
+                color={index % 2 == 0 ? "#219653" : "white"}
+                w="45%"
+                isTruncated
+                mr="4"
+              >
                 {product.name}
               </Text>
-              <Text fontSize="lg" w="33%" textAlign="center">
+              <Text
+                fontSize="lg"
+                color={index % 2 == 0 ? "#219653" : "white"}
+                w="20%"
+              >
                 {product.quantity}
               </Text>
-              <Text fontSize="lg" w="33%" textAlign="center">
-                {product.price}
+              <Text
+                fontSize="lg"
+                color={index % 2 == 0 ? "#219653" : "white"}
+                w="35%"
+              >
+                {new Intl.NumberFormat("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                }).format(product.price)}
               </Text>
             </HStack>
           )}

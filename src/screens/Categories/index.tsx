@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import ItemCheck from "../../components/ItemCheck";
-import { VStack, FlatList, View, Text, Input } from "native-base";
-import { Controller, FormProvider, useForm } from "react-hook-form";
+import { Product } from "../../components/ItemCheck";
+import { VStack, FlatList, View, Text } from "native-base";
+import { FormProvider, useForm } from "react-hook-form";
 import axios from "axios";
 import { ListSkeleton } from "../../components/ListSkeleton";
 import Header from "../../components/Header";
@@ -52,6 +52,12 @@ export default function Categories({
       ? filteredProducts
       : listProducts || [];
 
+  const handleContentSizeChange = () => {
+    const lastIndex = listProducts.length - 1;
+    const lastItem = listProducts[lastIndex];
+    setLastProduct(lastItem);
+  };
+
   const getCategories = (id?: string) => {
     setIsLoading(true);
     const url = id
@@ -61,17 +67,12 @@ export default function Categories({
       .get(url)
       .then((response) => {
         const products = response.data.products;
-
-        // filter out any products that already exist in the list
         const newProducts = products.filter((p: any) => {
           return listProducts.findIndex((lp) => lp.id === p.id) === -1;
         });
 
-        // add the filtered new products to the list
-        setListProducts([...listProducts, ...newProducts]);
-
-        setLastProduct(products.slice(-1)[0]);
         setIsLoading(false);
+        setListProducts([...listProducts, ...newProducts]);
       })
       .catch((error) => {
         console.error("deu chabu", error);
@@ -94,15 +95,12 @@ export default function Categories({
             letterSpacing={4}
             keyExtractor={(product: any) => product.id.toString()}
             renderItem={({ item: product }) => (
-              <ItemCheck
-                key={product.id}
-                id={product.id}
-                title={product.name}
-              />
+              <Product key={product.id} id={product.id} title={product.name} />
             )}
             initialNumToRender={10}
             maxToRenderPerBatch={10}
             showsVerticalScrollIndicator={false}
+            onContentSizeChange={handleContentSizeChange}
             onEndReached={() => {
               if (lastProduct) {
                 getCategories(lastProduct.id);
