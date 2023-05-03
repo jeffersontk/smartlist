@@ -16,7 +16,7 @@ export default function ModalIHaveAtHome({
       <Modal.Content maxWidth="420px">
         <Modal.Header bg="green.700">
           <Text color="white" fontFamily="heading" fontSize="lg">
-            Já tem em casa?
+            Já tem em casa
           </Text>
         </Modal.Header>
         <Modal.Body>

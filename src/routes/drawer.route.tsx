@@ -1,8 +1,11 @@
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import Categories from "../screens/Categories";
 import { DrawerContent } from "../components/Custom/DrawerContent";
+import { memo } from "react";
 
 const { Navigator, Screen } = createDrawerNavigator();
+
+const MemoizedCategories = memo(Categories);
 
 export function DrawerRouter() {
   return (
@@ -25,7 +28,7 @@ export function DrawerRouter() {
       <Screen
         name="Mercearia"
         children={({ navigation, route }) => (
-          <Categories
+          <MemoizedCategories
             category="grocery"
             navigation={navigation}
             route={route}
@@ -35,7 +38,7 @@ export function DrawerRouter() {
       <Screen
         name="Condimentos"
         children={({ navigation, route }) => (
-          <Categories
+          <MemoizedCategories
             category="condiments"
             navigation={navigation}
             route={route}
@@ -45,7 +48,7 @@ export function DrawerRouter() {
       <Screen
         name="Proteínas"
         children={({ navigation, route }) => (
-          <Categories
+          <MemoizedCategories
             category="protein"
             navigation={navigation}
             route={route}
@@ -55,7 +58,7 @@ export function DrawerRouter() {
       <Screen
         name="Lacticínios & Frios"
         children={({ navigation, route }) => (
-          <Categories
+          <MemoizedCategories
             category="dairyandcold"
             navigation={navigation}
             route={route}
@@ -65,19 +68,27 @@ export function DrawerRouter() {
       <Screen
         name="Doces"
         children={({ navigation, route }) => (
-          <Categories category="candy" navigation={navigation} route={route} />
+          <MemoizedCategories
+            category="candy"
+            navigation={navigation}
+            route={route}
+          />
         )}
       />
       <Screen
         name="Congelados"
         children={({ navigation, route }) => (
-          <Categories category="frozen" navigation={navigation} route={route} />
+          <MemoizedCategories
+            category="frozen"
+            navigation={navigation}
+            route={route}
+          />
         )}
       />
       <Screen
         name="Hortifruti"
         children={({ navigation, route }) => (
-          <Categories
+          <MemoizedCategories
             category="hortifruti"
             navigation={navigation}
             route={route}
@@ -87,7 +98,7 @@ export function DrawerRouter() {
       <Screen
         name="Descartáveis"
         children={({ navigation, route }) => (
-          <Categories
+          <MemoizedCategories
             category="disposable"
             navigation={navigation}
             route={route}
@@ -97,7 +108,7 @@ export function DrawerRouter() {
       <Screen
         name="Higiene pessoal"
         children={({ navigation, route }) => (
-          <Categories
+          <MemoizedCategories
             category="personalHygiene"
             navigation={navigation}
             route={route}
@@ -107,7 +118,7 @@ export function DrawerRouter() {
       <Screen
         name="Produtos de limpeza"
         children={({ navigation, route }) => (
-          <Categories
+          <MemoizedCategories
             category="cleaningProducts"
             navigation={navigation}
             route={route}
@@ -117,7 +128,7 @@ export function DrawerRouter() {
       <Screen
         name="Produtos de Bebê"
         children={({ navigation, route }) => (
-          <Categories
+          <MemoizedCategories
             category="babyProducts"
             navigation={navigation}
             route={route}

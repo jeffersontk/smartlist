@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 interface CartItem {
   id: string;
@@ -29,7 +35,7 @@ export const useCart = () => useContext(CartContext);
 
 const CartProvider = ({ children }: CartProviderProps) => {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [total, setTotal] = useState<number>(0);
+  /*  const [total, setTotal] = useState<number>(0); */
 
   const addItem = (items: CartItem[]) => {
     setItems((prevItems) => {
@@ -51,13 +57,17 @@ const CartProvider = ({ children }: CartProviderProps) => {
     setItems((prevItems) => prevItems.filter((i) => i.id !== itemId));
   };
 
-  // Calculate the total price whenever the items change
+  /*   // Calculate the total price whenever the items change
   useEffect(() => {
     const newTotal = items.reduce(
       (total, item) => total + item.price * item.quantity,
       0
     );
     setTotal(newTotal);
+  }, [items]); */
+
+  const total = useMemo(() => {
+    return items.reduce((total, item) => total + item.price * item.quantity, 0);
   }, [items]);
 
   const contextValue: CartContextType = {
