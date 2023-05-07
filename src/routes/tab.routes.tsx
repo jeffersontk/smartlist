@@ -1,10 +1,20 @@
 import React from "react";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { BottomTabNavigationProp, createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import IconEntypo from "react-native-vector-icons/Entypo";
-import Home from "../screens/Home";
 import MyCart from "../screens/MyCart";
-const { Navigator, Screen } = createBottomTabNavigator();
+import { DrawerRouter } from "./drawer.routes";
+
+type AppRoutes = {
+  list: undefined;
+  myCart: undefined;
+};
+
+
+export type AppNavigationRoutesProps = BottomTabNavigationProp<AppRoutes>;
+const { Navigator, Screen } = createBottomTabNavigator<AppRoutes>();
+
+
 export default function AppRouter() {
   return (
     <Navigator
@@ -21,10 +31,11 @@ export default function AppRouter() {
           paddingTop: 10,
         },
       }}
+      initialRouteName="list"
     >
       <Screen
-        name="List"
-        component={Home}
+        name="list"
+        component={DrawerRouter}
         options={{
           tabBarIcon: ({ color }) => (
             <IconEntypo name="list" size={30} color={color} />
@@ -32,7 +43,7 @@ export default function AppRouter() {
         }}
       />
       <Screen
-        name="MyCart"
+        name="myCart"
         component={MyCart}
         options={{
           tabBarIcon: ({ color }) => (
