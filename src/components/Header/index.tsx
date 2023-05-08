@@ -1,44 +1,31 @@
 import React from "react";
 import Logo from "../../assets/logo.svg";
-import {
-  VStack,
-  Input,
-  InputGroup,
-  InputLeftAddon,
-  HStack,
-  Text,
-  Center,
-} from "native-base";
+import { VStack, Input, InputGroup, InputLeftAddon, HStack } from "native-base";
+import { useRoute } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
-import IconEntypo from "react-native-vector-icons/Entypo";
 import { Controller, useFormContext } from "react-hook-form";
+import ListCategories from "../ListCategories";
 
-export default function Header({ navigation, title }: any) {
+export default function Header({ data }: any) {
+  const route = useRoute();
   const methods = useFormContext();
   const { control } = methods;
-
+  const { name } = route;
   return (
     <VStack>
-      <VStack
-        h={175}
+      <HStack
         backgroundColor="#219653"
         borderBottomRightRadius={30}
         borderBottomLeftRadius={30}
         paddingTop={58}
         paddingX={5}
+        py={3}
+        justifyContent="space-between"
+        alignItems="center"
       >
-        <HStack justifyContent="space-between" alignItems="center" mb="2">
-          <Logo />
-          <IconEntypo
-            name="menu"
-            size={34}
-            color="#f9f9f9"
-            onPress={() => navigation.toggleDrawer()}
-          />
-        </HStack>
         <InputGroup
           w={{
-            base: "90%",
+            base: "55%",
           }}
         >
           <InputLeftAddon
@@ -68,7 +55,7 @@ export default function Header({ navigation, title }: any) {
                 borderTopRightRadius="full"
                 borderBottomRightRadius="full"
                 bg="white"
-                placeholder="Procurando algum produto em especifico"
+                placeholder="Procure aqui"
                 placeholderTextColor="green.500"
                 borderLeftWidth={0}
                 _focus={{
@@ -81,12 +68,10 @@ export default function Header({ navigation, title }: any) {
             name="searchProduct"
           />
         </InputGroup>
-      </VStack>
-      <Center my="4">
-        <Text fontSize="xl" color="gray.700">
-          {title}
-        </Text>
-      </Center>
+
+        <Logo />
+      </HStack>
+      {name != "myCart" && <ListCategories data={data} />}
     </VStack>
   );
 }

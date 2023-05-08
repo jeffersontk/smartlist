@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { VStack } from "native-base";
 import { FormProvider, useForm } from "react-hook-form";
-import {useRoute,  useNavigation} from '@react-navigation/native';
+import { useRoute, useNavigation } from "@react-navigation/native";
 import axios from "axios";
 import Header from "../../components/Header";
 import ProductList from "../../components/ProductList";
+import { categories } from "../../data/categories";
 
 interface Params {
   category: string;
@@ -12,9 +13,7 @@ interface Params {
 
 export default function Categories() {
   const route = useRoute();
-  const navigation = useNavigation();
-  const {name} = route
-  const {category} = route.params as Params
+
   const methods = useForm();
   const [listProducts, setListProducts] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,24 +38,29 @@ export default function Categories() {
       ? filteredProducts
       : listProducts || [];
 
-  const getCategories = async () => {
+  const getCategories = () => {
     setIsLoading(true);
-    const  url = `https://expressjs-server-production-4171.up.railway.app/products?category=${category}`;
-    await axios
-      .get(url)
-      .then((response) => {
-        const products = response.data.products;
-        const newProducts = products.filter((p: any) => {
-          return listProducts.findIndex((lp) => lp.id === p.id) === -1;
-        });
+    if (route.params) {
+      const url = `https://expressjs-server-production-4171.up.railway.app/products?category=${route.params}`;
 
-        setIsLoading(false);
-        setListProducts([...listProducts, ...newProducts]);
-      })
-      .catch((error) => {
-        console.error("deu chabu", error);
-        setIsLoading(false);
-      });
+      axios
+        .get(url)
+        .then((response) => {
+          const products = response.data.products;
+          const newProducts = products.filter((p: any) => {
+            return listProducts.findIndex((lp) => lp.id === p.id) === -1;
+          });
+
+          setIsLoading(false);
+          setListProducts([...listProducts, ...newProducts]);
+        })
+        .catch((error) => {
+          console.error("deu chabu", error);
+          setIsLoading(false);
+        });
+    } else {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -66,8 +70,7 @@ export default function Categories() {
   return (
     <VStack flex={1} w="100%">
       <FormProvider {...methods}>
-        <Header navigation={navigation} title={name} />
-
+        <Header data={categories} />
         <ProductList data={productList} isLoading={isLoading} />
       </FormProvider>
     </VStack>

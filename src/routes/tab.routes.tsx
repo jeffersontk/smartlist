@@ -1,21 +1,26 @@
 import React from "react";
-import { BottomTabNavigationProp, createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import {
+  BottomTabNavigationProp,
+  createBottomTabNavigator,
+} from "@react-navigation/bottom-tabs";
 
 import IconEntypo from "react-native-vector-icons/Entypo";
 import MyCart from "../screens/MyCart";
-import { DrawerRouter } from "./drawer.routes";
+import Home from "../screens/Home";
+import Profile from "../screens/Profile";
+import { StackRoutes } from "./stack.routes";
 
 type AppRoutes = {
+  homeToTab: undefined;
   list: undefined;
   myCart: undefined;
+  profile: undefined;
 };
-
 
 export type AppNavigationRoutesProps = BottomTabNavigationProp<AppRoutes>;
 const { Navigator, Screen } = createBottomTabNavigator<AppRoutes>();
 
-
-export default function AppRouter() {
+export default function TabRouter() {
   return (
     <Navigator
       screenOptions={{
@@ -31,11 +36,11 @@ export default function AppRouter() {
           paddingTop: 10,
         },
       }}
-      initialRouteName="list"
+      initialRouteName="homeToTab"
     >
       <Screen
         name="list"
-        component={DrawerRouter}
+        component={StackRoutes}
         options={{
           tabBarIcon: ({ color }) => (
             <IconEntypo name="list" size={30} color={color} />
@@ -48,6 +53,15 @@ export default function AppRouter() {
         options={{
           tabBarIcon: ({ color }) => (
             <IconEntypo name="shopping-cart" size={30} color={color} />
+          ),
+        }}
+      />
+      <Screen
+        name="profile"
+        component={Profile}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <IconEntypo name="user" size={30} color={color} />
           ),
         }}
       />
