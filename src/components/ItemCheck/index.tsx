@@ -34,21 +34,15 @@ function ItemCheckComponent({
   showCurrentQuantity,
   showQuantityAndPrice,
 }: props) {
+  const SwipeActionRemoveItem = () => (
+    <Button background={"red.500"} h="100%" mr="2" onPress={handleRemoveItem}>
+      <Text color="white" width={70} textAlign="center" bold>
+        remover
+      </Text>
+    </Button>
+  );
+
   const LeftSwipeActions = useCallback(() => {
-    if (showQuantityAndPrice) {
-      return (
-        <Button
-          background={"red.500"}
-          h="100%"
-          mr="2"
-          onPress={handleRemoveItem}
-        >
-          <Text color="white" width={70} textAlign="center" bold>
-            remover
-          </Text>
-        </Button>
-      );
-    }
     return (
       <Button
         background={!isDisabled ? "red.500" : "green.600"}
@@ -66,7 +60,12 @@ function ItemCheckComponent({
   return (
     <>
       <HStack w="100%" mb="5">
-        <Swipeable ref={swipeableRef} renderLeftActions={LeftSwipeActions}>
+        <Swipeable
+          ref={swipeableRef}
+          renderLeftActions={
+            !showQuantityAndPrice ? LeftSwipeActions : SwipeActionRemoveItem
+          }
+        >
           <VStack
             w="100%"
             maxW={360}

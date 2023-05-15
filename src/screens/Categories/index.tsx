@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { VStack } from "native-base";
 import { FormProvider, useForm } from "react-hook-form";
-import { useRoute, useNavigation } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 import axios from "axios";
 import Header from "../../components/Header";
 import ProductList from "../../components/ProductList";
 import { categories } from "../../data/categories";
-
-interface Params {
-  category: string;
-}
 
 export default function Categories() {
   const route = useRoute();

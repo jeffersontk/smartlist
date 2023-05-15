@@ -56,7 +56,7 @@ export default function TabRouter() {
           ),
         }}
       />
-      <Screen
+      {/*    <Screen
         name="profile"
         component={Profile}
         options={{
@@ -64,7 +64,7 @@ export default function TabRouter() {
             <IconEntypo name="user" size={30} color={color} />
           ),
         }}
-      />
+      /> */}
     </Navigator>
   );
 }

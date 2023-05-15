@@ -16,6 +16,7 @@ import { categories } from "../../data/categories";
 
 import encarte1 from "../../assets/encarte1.jpeg";
 import encarte2 from "../../assets/encarte2.jpeg";
+import EncartList from "../../components/EncartesList";
 
 export default function Home() {
   const methods = useForm();
@@ -24,25 +25,7 @@ export default function Home() {
       <FormProvider {...methods}>
         <Header data={categories} />
       </FormProvider>
-
-      <ScrollView horizontal px="5" showsHorizontalScrollIndicator={false}>
-        <Image
-          source={encarte1}
-          alt=""
-          maxH={530}
-          w="320"
-          resizeMode="contain"
-          mr="3"
-        />
-        <Image
-          source={encarte2}
-          alt=""
-          maxH={530}
-          w="320"
-          resizeMode="contain"
-          mr="3"
-        />
-      </ScrollView>
+      <EncartList />
     </View>
   );
 }
